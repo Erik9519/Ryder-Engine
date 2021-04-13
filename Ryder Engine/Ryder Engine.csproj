@@ -40,7 +40,7 @@
 
   <ItemGroup>
     <Reference Include="MSI Afterburner Wrapper">
-      <HintPath>..\..\MSI Afterburner Wrapper\x64\Release\MSI Afterburner Wrapper.dll</HintPath>
+      <HintPath>Libs\MSI Afterburner Wrapper.dll</HintPath>
     </Reference>
   </ItemGroup>
 
