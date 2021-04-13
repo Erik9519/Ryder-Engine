@@ -54,7 +54,7 @@ namespace Ryder_Engine.Components
         {
             if (listeners.Count > 0)
             {
-                string data = JsonConvert.SerializeObject(systemMonitor.getStatus());
+                string data = systemMonitor.getStatusJSON();
                 foreach (var ip in listeners)
                 {
                     try
@@ -101,8 +101,7 @@ namespace Ryder_Engine.Components
                 {
                     case "status":
                         {
-                            var status = systemMonitor.getStatus();
-                            rsp_txt = JsonConvert.SerializeObject(status);
+                            rsp_txt = systemMonitor.getStatusJSON();
                             break;
                         }
                     case "subscribe":

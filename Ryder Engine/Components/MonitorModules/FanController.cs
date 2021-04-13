@@ -9,6 +9,7 @@ namespace Ryder_Engine.Components.MonitorModules
     class FanController
     {
         SerialPort serialPort = null;
+        public bool connected = false;
         public float ambient, liquid;
 
         public FanController(string port)
@@ -49,6 +50,7 @@ namespace Ryder_Engine.Components.MonitorModules
                 if (handler != null) serialPort.DataReceived += handler;
                 serialPort.ReadTimeout = 250;
                 serialPort.Open();
+                connected = true;
                 return true;
             }
             return false;

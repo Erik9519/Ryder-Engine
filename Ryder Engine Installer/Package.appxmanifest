@@ -11,12 +11,12 @@
 
   <Identity
     Name="22ee525e-13cb-4db0-bf92-73d1326940ac"
-    Publisher="CN=Erik"
-    Version="1.0.0.0" />
+    Publisher="CN=Erik Ussin"
+    Version="1.0.1.0" />
 
   <Properties>
     <DisplayName>Ryder Engine</DisplayName>
-    <PublisherDisplayName>Erik</PublisherDisplayName>
+    <PublisherDisplayName>Erik Ussin</PublisherDisplayName>
     <Logo>Images\StoreLogo.png</Logo>
   </Properties>
 

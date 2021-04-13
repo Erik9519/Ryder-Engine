@@ -36,7 +36,7 @@ namespace Ryder_Engine
             // Create and Initialize NotifyIcon
             notifyIcon = new NotifyIcon();
             notifyIcon.Icon = icon;
-            notifyIcon.Text = "Ryder Display";
+            notifyIcon.Text = "Ryder Engine";
             notifyIcon.ContextMenuStrip = new ContextMenuStrip();
             notifyIcon.ContextMenuStrip.Items.Add("Close");
             notifyIcon.ContextMenuStrip.Items[0].Click += close;

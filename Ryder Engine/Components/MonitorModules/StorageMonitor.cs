@@ -6,14 +6,14 @@ namespace Ryder_Engine.Components.MonitorModules
 {
     class StorageMonitor
     {
-        public struct Status
+        public struct Drive
         {
+            public char letter;
             public float readSpeed;
             public float writeSpeed;
         }
 
-        public string[] names;
-        public Status[] status;
+        public Drive[] drives;
 
         private PerformanceCounter[] diskRead;
         private PerformanceCounter[] diskWrite;
@@ -52,15 +52,14 @@ namespace Ryder_Engine.Components.MonitorModules
                 }
             }
             //// Setup
-            names = new string[instNames.Count];
-            status = new Status[instNames.Count];
+            drives = new Drive[instNames.Count];
             diskRead = new PerformanceCounter[instNames.Count];
             diskWrite = new PerformanceCounter[instNames.Count];
             for (int i = 0; i < instNames.Count; i++)
             {
+                drives[i].letter = instNames[i].Substring(instNames[i].Length - 2, 1).ToCharArray()[0];
                 diskRead[i] = new PerformanceCounter(category, readCounterName, instNames[i]);
                 diskWrite[i] = new PerformanceCounter(category, writeCounterName, instNames[i]);
-                names[i] = instNames[i].Substring(instNames[i].Length - 2, 1);
             }
         }
 
@@ -68,8 +67,8 @@ namespace Ryder_Engine.Components.MonitorModules
         {
             for (short i = 0; i < diskRead.Length; i++)
             {
-                status[i].readSpeed = diskRead[i].NextValue() / 1024f / 1024f;
-                status[i].writeSpeed = diskWrite[i].NextValue() / 1024f / 1024f;
+                drives[i].readSpeed = diskRead[i].NextValue() / 1024f / 1024f;
+                drives[i].writeSpeed = diskWrite[i].NextValue() / 1024f / 1024f;
             }
         }
     }
