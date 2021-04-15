@@ -17,8 +17,8 @@ namespace Ryder_Engine.Forms
         {
             InitializeComponent();
             this.ip = ip;
-            this.Focus();
             this.TopLevel = true;
+            this.Focus();
         }
 
         private void loginButton_Click(object sender, EventArgs e)

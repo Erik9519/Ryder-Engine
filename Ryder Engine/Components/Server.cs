@@ -155,6 +155,7 @@ namespace Ryder_Engine.Components
                                 Steam_Login steamLoginForm = new Steam_Login(ip);
                                 steamLoginForm.sendSteamLogin = this.sendSteamLoginUsernameAndPassword;
                                 Application.Run(steamLoginForm);
+                                steamLoginForm.Dispose();
                             }).Start();
                             rsp_txt = JsonConvert.SerializeObject("OK");
                             Debug.WriteLine("Steam login data request");
@@ -168,6 +169,7 @@ namespace Ryder_Engine.Components
                                 Steam_2FA steam2faForm = new Steam_2FA(ip);
                                 steam2faForm.sendSteam2FA = this.sendSteam2FA;
                                 Application.Run(steam2faForm);
+                                steam2faForm.Dispose();
                             }).Start();
                             rsp_txt = JsonConvert.SerializeObject("OK");
                             Debug.WriteLine("Steam 2FA data request");
@@ -276,6 +278,7 @@ namespace Ryder_Engine.Components
                 if (p != null)
                 {
                     string filename = p.MainModule.FileName;
+                    Debug.WriteLine("Application: " + p.MainModule.FileName);
                     IntPtr hIcon = IconExtractor.GetJumboIcon(IconExtractor.GetIconIndex(filename));
                     // Extract Icon
                     string result;
@@ -283,15 +286,17 @@ namespace Ryder_Engine.Components
                     using (Bitmap ico = ((Icon)Icon.FromHandle(hIcon).Clone()).ToBitmap())
                     {
                         Bitmap bitmap = IconExtractor.ClipToCircle(ico);
-                        // save to file (or show in a picture box)
                         result = Convert.ToBase64String((byte[])converter.ConvertTo(bitmap, typeof(byte[])));
                         bitmap.Dispose();
                     }
                     IconExtractor.Shell32.DestroyIcon(hIcon); // Cleanup
+                    GC.Collect();
                     return result;
                 }
             }
-            catch (Exception e) { }
+            catch (Exception e) {
+                Debug.WriteLine("Exception: " + e.Message);
+            }
             return null;
         }
     }

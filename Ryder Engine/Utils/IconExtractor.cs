@@ -409,6 +409,7 @@ namespace Ryder_Engine.Utils
                 g.SetClip(path);
                 int ofst = (high_gap - low_gap) / 2;
                 g.DrawImage(srcImage, ofst, ofst);
+                srcImage.Dispose();
 
                 Bitmap dstImage = new Bitmap(tmpImage, new Size(resolution, resolution));
                 tmpImage.Dispose();

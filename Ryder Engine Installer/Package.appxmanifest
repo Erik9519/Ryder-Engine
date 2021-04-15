@@ -61,8 +61,8 @@
   </Applications>
 
   <Capabilities>
-    <Capability Name="internetClient" />
     <rescap:Capability Name="runFullTrust" />
+    <rescap:Capability Name="allowElevation" />
     <uap3:Capability Name="userNotificationListener"/>
   </Capabilities>
 </Package>

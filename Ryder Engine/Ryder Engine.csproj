@@ -10,6 +10,7 @@
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageId>Ryder_Engine</PackageId>
     <ApplicationIcon>Resources\Icon.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
