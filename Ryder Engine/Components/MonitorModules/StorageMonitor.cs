@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
@@ -61,6 +62,9 @@ namespace Ryder_Engine.Components.MonitorModules
                 diskRead[i] = new PerformanceCounter(category, readCounterName, instNames[i]);
                 diskWrite[i] = new PerformanceCounter(category, writeCounterName, instNames[i]);
             }
+            // Release Memory
+            fixedDrives.Clear(); cat = null;
+            GC.Collect();
         }
 
         public void update()

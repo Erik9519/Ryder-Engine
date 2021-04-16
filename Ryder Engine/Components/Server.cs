@@ -62,7 +62,7 @@ namespace Ryder_Engine.Components
                         HttpContent content = new StringContent(data, Encoding.UTF8, "application/json");
                         client.PostAsync(ip + "/status", content);
                     }
-                    catch (Exception e) { }
+                    catch { }
                 }
             }
         }
@@ -212,7 +212,7 @@ namespace Ryder_Engine.Components
                     response.OutputStream.Close();
                     response.Close();
                 }
-                catch (Exception e) { }
+                catch { }
             }
         }
 
@@ -225,7 +225,7 @@ namespace Ryder_Engine.Components
                     HttpContent content = new StringContent(JsonConvert.SerializeObject(name), Encoding.UTF8, "application/json");
                     client.PostAsync(ip + "/foregroundProcessName", content);
                 }
-                catch (Exception e) { }
+                catch { }
             }
         }
 
@@ -237,7 +237,7 @@ namespace Ryder_Engine.Components
                 {
                     HttpContent content = new StringContent(JsonConvert.SerializeObject(notification), Encoding.UTF8, "application/json");
                     client.PostAsync(ip+"/notification", content);
-                } catch (Exception e) { }
+                } catch { }
             }
         }
 
@@ -249,7 +249,7 @@ namespace Ryder_Engine.Components
                 HttpContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
                 client.PostAsync(formData[2] + "/steamLogin", content);
             }
-            catch (Exception e) { }
+            catch { }
         }
 
         public void sendSteam2FA(object sender, string[] formData)
@@ -260,7 +260,7 @@ namespace Ryder_Engine.Components
                 HttpContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
                 client.PostAsync(formData[1] + "/steam2fa", content);
             }
-            catch (Exception e) { }
+            catch { }
         }
 
         private string getIPfromContext(HttpListenerContext ctx)
