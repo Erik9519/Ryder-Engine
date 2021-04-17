@@ -24,7 +24,7 @@ namespace Ryder_Engine.Components
             msiMonitor = new MSIMonitor();
             networkMonitor = new NetworkMonitor();
             storageMonitor = new StorageMonitor();
-            fanController = new FanController("COM4");
+            fanController = new FanController(Environment.MachineName == "DESKTOP-ERIK" ? "COM4" : "null");
         }
 
         public void update()

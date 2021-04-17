@@ -12,7 +12,7 @@
   <Identity
     Name="22ee525e-13cb-4db0-bf92-73d1326940ac"
     Publisher="CN=Erik Ussin"
-    Version="1.0.1.0" />
+    Version="1.0.2.0" />
 
   <Properties>
     <DisplayName>Ryder Engine</DisplayName>

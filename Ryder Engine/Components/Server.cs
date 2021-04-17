@@ -10,6 +10,7 @@ using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -18,6 +19,9 @@ namespace Ryder_Engine.Components
 {
     class Server
     {
+        [DllImport("psapi.dll")]
+        static extern int EmptyWorkingSet(IntPtr hwProc);
+
         public static HttpListener listener;
         public static HttpClient client;
         public static string url = "http://+:9519/";
@@ -291,6 +295,7 @@ namespace Ryder_Engine.Components
                     }
                     IconExtractor.Shell32.DestroyIcon(hIcon); // Cleanup
                     GC.Collect();
+                    EmptyWorkingSet(Process.GetCurrentProcess().Handle);
                     return result;
                 }
             }
