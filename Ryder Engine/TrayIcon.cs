@@ -1,8 +1,6 @@
-﻿using Microsoft.Toolkit.Uwp.Notifications;
-using Ryder_Engine.Components;
+﻿using Ryder_Engine.Components;
 using Ryder_Engine.Properties;
 using Ryder_Engine.Components.Tools;
-using Ryder_Engine.Utils;
 using System;
 using System.IO;
 using System.Windows.Forms;
@@ -26,7 +24,6 @@ namespace Ryder_Engine
             powerPlanManager = new PowerPlanManager();
             systemMonitor = new SystemMonitor();
             server = new Server(systemMonitor, powerPlanManager);
-            systemMonitor.notificationMonitor.newNotification = server.sendNotificationToListener;
             systemMonitor.foregroundProcessMonitor.newForegroundProcess = server.sendForegroundProcessToListener;
             server.start();
             // Retrieve Application Icon

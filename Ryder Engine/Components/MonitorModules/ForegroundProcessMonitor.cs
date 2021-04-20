@@ -56,7 +56,7 @@ namespace Ryder_Engine.Components.MonitorModules
                 if (!first) newForegroundProcess.Invoke(this, foregroundProcessName);
                 else first = false;
             }
-            catch (Exception e)
+            catch
             {
                 if (foregroundProcess != null)
                 {

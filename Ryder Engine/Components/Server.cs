@@ -82,22 +82,24 @@ namespace Ryder_Engine.Components
                 }
                 catch (HttpListenerException ex)
                 {
-                    Debug.Print("Error");
+                    Debug.Print("Error: " + ex.Message);
                 }
 
                 if (ctx == null) continue;
 
                 // Process Request
                 HttpListenerRequest request = ctx.Request;
+                HttpListenerResponse response = ctx.Response;
+
                 string txt;
                 using (var reader = new StreamReader(request.InputStream, request.ContentEncoding))
                 {
                     txt = reader.ReadToEnd();
                 }
+                Debug.WriteLine(txt);
                 dynamic json_request = JsonConvert.DeserializeObject(txt);
                 string txt_request = json_request["request"];
 
-                HttpListenerResponse response = ctx.Response;
                 response.ContentType = "application/json";
                 string rsp_txt = "";
                 byte[] rsp_buff;
@@ -116,7 +118,8 @@ namespace Ryder_Engine.Components
                                 listeners.Add(ip);
                                 Debug.WriteLine(ip);
                                 rsp_txt = JsonConvert.SerializeObject(ip + " registered");
-                            } else
+                            }
+                            else
                             {
                                 rsp_txt = JsonConvert.SerializeObject(ip + " is already registered");
                             }
@@ -131,7 +134,8 @@ namespace Ryder_Engine.Components
                     case "foregroundProcessIcon":
                         {
                             string ip = getIPfromContext(ctx);
-                            new Thread(() => {
+                            new Thread(() =>
+                            {
                                 // Retrieve process name and icon
                                 Process process = systemMonitor.foregroundProcessMonitor.foregroundProcess;
                                 string name = null;
@@ -155,7 +159,8 @@ namespace Ryder_Engine.Components
                     case "steamLoginUP":
                         {
                             string ip = getIPfromContext(ctx);
-                            new Thread(() => {
+                            new Thread(() =>
+                            {
                                 Steam_Login steamLoginForm = new Steam_Login(ip);
                                 steamLoginForm.sendSteamLogin = this.sendSteamLoginUsernameAndPassword;
                                 Application.Run(steamLoginForm);
@@ -230,18 +235,6 @@ namespace Ryder_Engine.Components
                     client.PostAsync(ip + "/foregroundProcessName", content);
                 }
                 catch { }
-            }
-        }
-
-        public void sendNotificationToListener(object sender, NotificationMonitor.Notification notification)
-        {
-            foreach (var ip in listeners)
-            {
-                try
-                {
-                    HttpContent content = new StringContent(JsonConvert.SerializeObject(notification), Encoding.UTF8, "application/json");
-                    client.PostAsync(ip+"/notification", content);
-                } catch { }
             }
         }
 

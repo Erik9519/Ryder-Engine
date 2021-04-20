@@ -1,16 +1,10 @@
 ﻿using Ryder_Engine.Components.MonitorModules;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using Windows.Foundation.Metadata;
-using Windows.UI.Notifications;
-using Windows.UI.Notifications.Management;
 
 namespace Ryder_Engine.Components
 {
     class SystemMonitor
     {
-        public NotificationMonitor notificationMonitor;
         public ForegroundProcessMonitor foregroundProcessMonitor;
         public MSIMonitor msiMonitor;
         public NetworkMonitor networkMonitor;
@@ -19,7 +13,6 @@ namespace Ryder_Engine.Components
 
         public SystemMonitor()
         {
-            notificationMonitor = new NotificationMonitor();
             foregroundProcessMonitor = new ForegroundProcessMonitor();
             msiMonitor = new MSIMonitor();
             networkMonitor = new NetworkMonitor();
