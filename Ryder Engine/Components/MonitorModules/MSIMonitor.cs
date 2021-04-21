@@ -2,7 +2,7 @@
 
 namespace Ryder_Engine.Components.MonitorModules
 {
-    class MSIMonitor
+    public class MSIMonitor
     {
         private AfterBurner msi;
 

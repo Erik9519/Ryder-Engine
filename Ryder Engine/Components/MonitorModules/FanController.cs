@@ -6,22 +6,39 @@ using System.Text;
 
 namespace Ryder_Engine.Components.MonitorModules
 {
-    class FanController
+    public class FanController
     {
         SerialPort serialPort = null;
-        public bool connected = false;
+        public string port = "";
         public float ambient, liquid;
 
         public FanController(string port)
         {
-            string[] ports = scanPorts();
-            foreach (string p in ports)
+            connect(port);
+        }
+
+        public void connect(string port)
+        {
+            if (this.port != port || (serialPort != null && !serialPort.IsOpen) || serialPort == null)
             {
-                if (p == port)
+                if (serialPort != null && serialPort.IsOpen)
                 {
-                    connectTo(port, null);
-                    discardBuffer();
-                    break;
+                    serialPort.Close();
+                    serialPort.Dispose();
+                    serialPort = null;
+                }
+
+                string[] ports = scanPorts();
+                foreach (string p in ports)
+                {
+                    if (p == port)
+                    {
+                        serialPort = new SerialPort(port, 500000);
+                        serialPort.ReadTimeout = 250;
+                        serialPort.Open();
+                        discardBuffer();
+                        break;
+                    }
                 }
             }
         }
@@ -40,25 +57,6 @@ namespace Ryder_Engine.Components.MonitorModules
         public void discardBuffer()
         {
             serialPort.DiscardInBuffer();
-        }
-
-        public bool connectTo(string port, SerialDataReceivedEventHandler handler)
-        {
-            if (serialPort == null)
-            {
-                serialPort = new SerialPort(port, 500000);
-                if (handler != null) serialPort.DataReceived += handler;
-                serialPort.ReadTimeout = 250;
-                serialPort.Open();
-                connected = true;
-                return true;
-            }
-            return false;
-        }
-
-        public bool isConnected()
-        {
-            return serialPort != null;
         }
 
         public bool disconnect()

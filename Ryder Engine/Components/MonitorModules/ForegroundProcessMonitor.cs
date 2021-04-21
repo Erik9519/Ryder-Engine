@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Ryder_Engine.Components.MonitorModules
 {
-    class ForegroundProcessMonitor
+    public class ForegroundProcessMonitor
     {
         #region FOREGROUND_DETECTION
         private WinEventDelegate dele = null;
@@ -21,18 +21,26 @@ namespace Ryder_Engine.Components.MonitorModules
         static extern IntPtr SetWinEventHook(uint eventMin, uint eventMax, IntPtr hmodWinEventProc, WinEventDelegate lpfnWinEventProc, uint idProcess, uint idThread, uint dwFlags);
         [DllImport("user32.dll")]
         public static extern IntPtr GetWindowThreadProcessId(IntPtr hWnd, out uint ProcessId);
+        [DllImport("user32.dll")]
+        public static extern int UnhookWinEvent(IntPtr hWinEventHook);
         #endregion
 
         public EventHandler<string> newForegroundProcess;
         public Process foregroundProcess = null;
         public string foregroundProcessName = null;
+        private IntPtr winHook;
         public bool first = true;
 
         public ForegroundProcessMonitor()
         {
             dele = new WinEventDelegate(WinEventProc);
-            SetWinEventHook(EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND, IntPtr.Zero, dele, 0, 0, WINEVENT_OUTOFCONTEXT);
+            winHook = SetWinEventHook(EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND, IntPtr.Zero, dele, 0, 0, WINEVENT_OUTOFCONTEXT);
             WinEventProc(IntPtr.Zero, 0, GetForegroundWindow(), 0, 0, 0, 0);
+        }
+
+        public void Dispose()
+        {
+            UnhookWinEvent(winHook);
         }
 
         private void WinEventProc(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime)

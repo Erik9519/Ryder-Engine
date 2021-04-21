@@ -125,34 +125,40 @@ namespace Ryder_Engine.Components
                             }
                             new Thread(() =>
                             {
-                                HttpContent content = new StringContent(JsonConvert.SerializeObject(systemMonitor.foregroundProcessMonitor.foregroundProcessName), Encoding.UTF8, "application/json");
-                                Debug.WriteLine(systemMonitor.foregroundProcessMonitor.foregroundProcessName);
-                                client.PostAsync(ip + "/foregroundProcessName", content);
+                                if (systemMonitor.foregroundProcessMonitor != null)
+                                {
+                                    HttpContent content = new StringContent(JsonConvert.SerializeObject(systemMonitor.foregroundProcessMonitor.foregroundProcessName), Encoding.UTF8, "application/json");
+                                    Debug.WriteLine(systemMonitor.foregroundProcessMonitor.foregroundProcessName);
+                                    client.PostAsync(ip + "/foregroundProcessName", content);
+                                }
                             }).Start();
                             break;
                         }
                     case "foregroundProcessIcon":
                         {
                             string ip = getIPfromContext(ctx);
-                            new Thread(() =>
+                            if (systemMonitor.foregroundProcessMonitor != null)
                             {
-                                // Retrieve process name and icon
-                                Process process = systemMonitor.foregroundProcessMonitor.foregroundProcess;
-                                string name = null;
-                                string icon = convertExeIconToBase64(process);
-                                try
+                                new Thread(() =>
                                 {
-                                    name = process != null ? process.ProcessName : null;
-                                }
-                                catch { }
-                                // Attempt to send data back to requester
-                                try
-                                {
-                                    HttpContent content = new StringContent(JsonConvert.SerializeObject(new string[] { name, icon }), Encoding.UTF8, "application/json");
-                                    client.PostAsync(ip + "/foregroundProcessIcon", content);
-                                }
-                                catch { }
-                            }).Start();
+                                    // Retrieve process name and icon
+                                    Process process = systemMonitor.foregroundProcessMonitor.foregroundProcess;
+                                    string name = null;
+                                    string icon = convertExeIconToBase64(process);
+                                    try
+                                    {
+                                        name = process != null ? process.ProcessName : null;
+                                    }
+                                    catch { }
+                                    // Attempt to send data back to requester
+                                    try
+                                    {
+                                        HttpContent content = new StringContent(JsonConvert.SerializeObject(new string[] { name, icon }), Encoding.UTF8, "application/json");
+                                        client.PostAsync(ip + "/foregroundProcessIcon", content);
+                                    }
+                                    catch { }
+                                }).Start();
+                            }
                             rsp_txt = JsonConvert.SerializeObject("OK");
                             break;
                         }

@@ -3,7 +3,7 @@ using System.Net.NetworkInformation;
 
 namespace Ryder_Engine.Components.MonitorModules
 {
-    class NetworkMonitor
+    public class NetworkMonitor
     {
         public struct Status
         {

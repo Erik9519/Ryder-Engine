@@ -5,7 +5,7 @@ using System.IO;
 
 namespace Ryder_Engine.Components.MonitorModules
 {
-    class StorageMonitor
+    public class StorageMonitor
     {
         public struct Drive
         {
@@ -43,12 +43,20 @@ namespace Ryder_Engine.Components.MonitorModules
             {
                 List<string> instNames_tmp = new List<string>(cat.GetInstanceNames());
                 instNames_tmp.Remove("_Total");
-                instNames_tmp.Sort((x, y) => { if (x[x.Length - 2] > y[y.Length - 2]) return 1; else return -1; });
+                instNames_tmp.Sort((x, y) => { 
+                    if ((x.Length >= 2 && y.Length >= 2) && (x[x.Length - 2] > y[y.Length - 2]))
+                        return 1; 
+                    else 
+                        return -1; 
+                });
                 for (int i = 0; i < instNames_tmp.Count; i++)
                 {
-                    if (fixedDrives.Contains(instNames_tmp[i][instNames_tmp[i].Length - 2]))
+                    if (instNames_tmp[i].Length >= 3)
                     {
-                        instNames.Add(instNames_tmp[i]);
+                        if (fixedDrives.Contains(instNames_tmp[i][instNames_tmp[i].Length - 2]))
+                        {
+                            instNames.Add(instNames_tmp[i]);
+                        }
                     }
                 }
             }
@@ -73,6 +81,15 @@ namespace Ryder_Engine.Components.MonitorModules
             {
                 drives[i].readSpeed = diskRead[i].NextValue() / 1024f / 1024f;
                 drives[i].writeSpeed = diskWrite[i].NextValue() / 1024f / 1024f;
+            }
+        }
+
+        public void Dispose()
+        {
+            for (short i = 0; i < diskRead.Length; i++)
+            {
+                diskRead[i].Dispose();
+                diskWrite[i].Dispose();
             }
         }
     }

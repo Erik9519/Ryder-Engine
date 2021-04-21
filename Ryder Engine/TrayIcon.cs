@@ -4,6 +4,7 @@ using Ryder_Engine.Components.Tools;
 using System;
 using System.IO;
 using System.Windows.Forms;
+using Ryder_Engine.Forms;
 
 namespace Ryder_Engine
 { 
@@ -17,6 +18,7 @@ namespace Ryder_Engine
         SystemMonitor systemMonitor;
         PowerPlanManager powerPlanManager;
         Server server;
+        Forms.Settings settings;
 
         public TrayIcon()
         {
@@ -24,8 +26,9 @@ namespace Ryder_Engine
             powerPlanManager = new PowerPlanManager();
             systemMonitor = new SystemMonitor();
             server = new Server(systemMonitor, powerPlanManager);
-            systemMonitor.foregroundProcessMonitor.newForegroundProcess = server.sendForegroundProcessToListener;
+            systemMonitor.newForegroundProcess = server.sendForegroundProcessToListener;
             server.start();
+            systemMonitor.applySettings();
             // Retrieve Application Icon
             MemoryStream ms = new MemoryStream(Resources.Icon);
             System.Drawing.Icon icon = new System.Drawing.Icon(ms);
@@ -35,14 +38,28 @@ namespace Ryder_Engine
             notifyIcon.Icon = icon;
             notifyIcon.Text = "Ryder Engine";
             notifyIcon.ContextMenuStrip = new ContextMenuStrip();
+            notifyIcon.ContextMenuStrip.Items.Add("Settings");
+            notifyIcon.ContextMenuStrip.Items[0].Click += openSettings; ;
             notifyIcon.ContextMenuStrip.Items.Add("Close");
-            notifyIcon.ContextMenuStrip.Items[0].Click += close;
+            notifyIcon.ContextMenuStrip.Items[1].Click += close;
             notifyIcon.Visible = true;
             // Initialize interrupt timer
             timer = new Timer();
             timer.Interval = 1000;
             timer.Tick += systemMonitorUpdate;
             timer.Start();
+        }
+
+        private void openSettings(object sender, EventArgs e)
+        {
+            if (settings == null || settings.IsDisposed)
+            {
+                settings = new Forms.Settings(systemMonitor);
+                settings.Show();
+            } else
+            {
+                settings.BringToFront();
+            }
         }
 
         private void systemMonitorUpdate(object sender, EventArgs e)
