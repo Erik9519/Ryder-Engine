@@ -112,11 +112,10 @@ namespace Ryder_Engine.Components
                         }
                     case "subscribe":
                         {
-                            string ip = getIPfromContext(ctx);
+                            string ip = "http://" + json_request["ip"] + ":9520";
                             if (!listeners.Contains(ip))
                             {
                                 listeners.Add(ip);
-                                Debug.WriteLine(ip);
                                 rsp_txt = JsonConvert.SerializeObject(ip + " registered");
                             }
                             else
@@ -136,7 +135,7 @@ namespace Ryder_Engine.Components
                         }
                     case "foregroundProcessIcon":
                         {
-                            string ip = getIPfromContext(ctx);
+                            string ip = "http://" + json_request["ip"] + ":9520";
                             if (systemMonitor.foregroundProcessMonitor != null)
                             {
                                 new Thread(() =>
@@ -164,7 +163,7 @@ namespace Ryder_Engine.Components
                         }
                     case "steamLoginUP":
                         {
-                            string ip = getIPfromContext(ctx);
+                            string ip = "http://" + json_request["ip"] + ":9520";
                             new Thread(() =>
                             {
                                 Steam_Login steamLoginForm = new Steam_Login(ip);
@@ -178,7 +177,7 @@ namespace Ryder_Engine.Components
                         }
                     case "steamLogin2FA":
                         {
-                            string ip = getIPfromContext(ctx);
+                            string ip = "http://" + json_request["ip"] + ":9520";
                             new Thread(() =>
                             {
                                 Steam_2FA steam2faForm = new Steam_2FA(ip);
@@ -264,14 +263,6 @@ namespace Ryder_Engine.Components
                 client.PostAsync(formData[1] + "/steam2fa", content);
             }
             catch { }
-        }
-
-        private string getIPfromContext(HttpListenerContext ctx)
-        {
-            string ip = ctx.Request.RemoteEndPoint.ToString();
-            ip = ip.Substring(0, ip.LastIndexOf(":"));
-            ip = "http://" + ip + ":9520";
-            return ip;
         }
 
         private string convertExeIconToBase64(Process p)
