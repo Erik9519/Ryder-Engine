@@ -72,6 +72,7 @@ namespace Ryder_Engine
         {
             this.server.stop();
             this.timer.Stop();
+            this.notifyIcon.Dispose();
             this.Dispose();
             Application.Exit();
         }
