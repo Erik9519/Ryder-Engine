@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Ryder_Engine.Components.Tools
 {
-    static class AudioManager
+    static public class AudioManager
     {
         static public void switchDeviceTo(string device, int type)
         {

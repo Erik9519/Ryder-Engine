@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Ryder_Engine.Components.Tools
 {
-    class PowerPlanManager
+    public class PowerPlanManager
     {
         Dictionary<string, string> powerPlan = new Dictionary<string, string>();
         public string activePowerPlan;

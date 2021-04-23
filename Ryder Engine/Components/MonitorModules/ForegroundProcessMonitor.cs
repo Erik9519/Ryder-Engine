@@ -61,7 +61,7 @@ namespace Ryder_Engine.Components.MonitorModules
                 }
                 foregroundProcessName = newProcess.ProcessName;
                 foregroundProcess = newProcess;
-                if (!first) newForegroundProcess.Invoke(this, foregroundProcessName);
+                if (!first) newForegroundProcess.Invoke(this, "\"" + foregroundProcessName + "\"");
                 else first = false;
             }
             catch
@@ -69,7 +69,7 @@ namespace Ryder_Engine.Components.MonitorModules
                 if (foregroundProcess != null)
                 {
                     foregroundProcess = null;
-                    if (!first) newForegroundProcess.Invoke(this, null);
+                    if (!first) newForegroundProcess.Invoke(this, "null");
                     else first = false;
                 } 
             }

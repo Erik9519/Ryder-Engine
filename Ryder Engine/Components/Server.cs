@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using Ryder_Engine.Components.MonitorModules;
 using Ryder_Engine.Components.Tools;
 using Ryder_Engine.Forms;
 using Ryder_Engine.Utils;
@@ -9,24 +8,28 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Net;
-using System.Net.Http;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Ryder_Engine.Components
 {
-    class Server
+    public class Server
     {
+        public struct Listener
+        {
+            public Mutex m;
+            public StreamWriter writer;
+        }
+
         [DllImport("psapi.dll")]
         static extern int EmptyWorkingSet(IntPtr hwProc);
 
-        public static HttpListener listener;
-        public static HttpClient client;
-        public static string url = "http://+:9519/";
+        private TcpListener listener;
 
-        private List<string> listeners = new List<string>();
+        private List<Listener> listeners = new List<Listener>();
         private bool _stop = false;
         private SystemMonitor systemMonitor;
         private PowerPlanManager powerPlanManager;
@@ -36,16 +39,22 @@ namespace Ryder_Engine.Components
             this.systemMonitor = systemMonitor;
             this.powerPlanManager = powerPlanManager;
 
-            listener = new HttpListener();
-            listener.Prefixes.Add(url);
-            client = new HttpClient();
+            this.listener = new TcpListener(IPAddress.Any, 9519);
         }
 
         public void start()
         {
             _stop = false;
             listener.Start();
-            ListenAsync();
+            new Thread(() =>
+            {
+                TcpClient client;
+                while (!_stop)
+                {
+                    client = listener.AcceptTcpClient();
+                    ThreadPool.QueueUserWorkItem(handleClient, client);
+                }
+            }).Start();
         }
 
         public void stop()
@@ -54,177 +63,140 @@ namespace Ryder_Engine.Components
             listener.Stop();
         }
 
-        public void sendDataToListeners()
+        public void handleClient(object obj)
         {
-            if (listeners.Count > 0)
+            TcpClient client = (TcpClient)obj;
+            Listener listener = new Listener();
+            listener.m = new Mutex();
+
+            NetworkStream stream = client.GetStream();
+            StreamReader reader = new StreamReader(stream);
+            listener.writer = new StreamWriter(stream);
+            listener.writer.NewLine = "\n";
+            listeners.Add(listener);
+
+            while (!_stop && client.Connected)
             {
-                string data = systemMonitor.getStatusJSON();
-                foreach (var ip in listeners)
+                try
                 {
-                    try
+                    string data = reader.ReadLine();
+                    Debug.WriteLine(data);
+                    string[] json_request = JsonConvert.DeserializeObject<string[]>(data);
+
+                    switch (json_request[0])
                     {
-                        HttpContent content = new StringContent(data, Encoding.UTF8, "application/json");
-                        client.PostAsync(ip + "/status", content);
+                        case "status":
+                            {
+                                try
+                                {
+                                    listener.m.WaitOne();
+                                    listener.writer.WriteLine("[\"status\"," + systemMonitor.getStatusJSON() + "]");
+                                    listener.writer.Flush();
+                                    listener.m.ReleaseMutex();
+                                }
+                                catch { }
+                                break;
+                            }
+                        case "foregroundProcessName":
+                            {
+                                try
+                                {
+                                    Process process = systemMonitor.foregroundProcessMonitor.foregroundProcess;
+                                    string name = "null";
+                                    name = process != null ? ("\"" + process.ProcessName + "\"") : null;
+
+                                    listener.m.WaitOne();
+                                    listener.writer.WriteLine("[\"foregroundProcessName\"," + name + "]");
+                                    listener.writer.Flush();
+                                    listener.m.ReleaseMutex();
+                                }
+                                catch { }
+                                break;
+                            }
+                        case "foregroundProcessIcon":
+                            {
+                                // Retrieve process name and icon
+                                Process process = systemMonitor.foregroundProcessMonitor.foregroundProcess;
+                                string name = "null";
+                                string icon = "null";
+                                try
+                                {
+                                    name = process != null ? ("\"" + process.ProcessName + "\"") : null;
+                                    string icon_t = convertExeIconToBase64(process);
+                                    if (icon_t != null) icon = "\"" + icon_t + "\"";
+                                }
+                                catch { }
+                                // Attempt to send data back to requester
+                                try
+                                {
+                                    Debug.WriteLine("Foreground Process Icon: " + name);
+                                    listener.m.WaitOne();
+                                    listener.writer.WriteLine("[\"foregroundProcessIcon\"," + name + "," + icon + "]");
+                                    listener.writer.Flush();
+                                    listener.m.ReleaseMutex();
+                                }
+                                catch { }
+                                break;
+                            }
+                        case "steamLoginUP":
+                            {
+                                new Task(() =>
+                                {
+                                    Steam_Login steamLoginForm = new Steam_Login(listener);
+                                    Application.Run(steamLoginForm);
+                                    steamLoginForm.Dispose();
+                                }).Start();
+                                Debug.WriteLine("Steam login data request");
+                                break;
+                            }
+                        case "steamLogin2FA":
+                            {
+                                new Task(() =>
+                                {
+                                    Steam_2FA steam2faForm = new Steam_2FA(listener);
+                                    Application.Run(steam2faForm);
+                                    steam2faForm.Dispose();
+                                }).Start();
+                                Debug.WriteLine("Steam 2FA data request");
+                                break;
+                            }
+                        case "powerPlan":
+                            {
+                                powerPlanManager.applyPowerPlan(json_request[1]);
+                                break;
+                            }
+                        case "audioProfile":
+                            {
+                                AudioManager.switchDeviceTo(json_request[1], 1);
+                                AudioManager.switchDeviceTo(json_request[2], 2);
+                                AudioManager.switchDeviceTo(json_request[3], 1);
+                                AudioManager.switchDeviceTo(json_request[3], 2);
+                                break;
+                            }
+                        default:
+                            {
+                                break;
+                            }
                     }
-                    catch { }
                 }
+                catch { }
             }
+
+            listeners.Remove(listener);
+            stream.Close();
+            client.Close();
         }
 
-        public async void ListenAsync()
+        public void sendDataToListeners()
         {
-            while (!_stop)
+            foreach (Listener listener in listeners)
             {
-                HttpListenerContext ctx = null;
                 try
                 {
-                    ctx = await listener.GetContextAsync();
-                }
-                catch (HttpListenerException ex)
-                {
-                    Debug.Print("Error: " + ex.Message);
-                }
-
-                if (ctx == null) continue;
-
-                // Process Request
-                HttpListenerRequest request = ctx.Request;
-                HttpListenerResponse response = ctx.Response;
-
-                string txt;
-                using (var reader = new StreamReader(request.InputStream, request.ContentEncoding))
-                {
-                    txt = reader.ReadToEnd();
-                }
-                Debug.WriteLine(txt);
-                dynamic json_request = JsonConvert.DeserializeObject(txt);
-                string txt_request = json_request["request"];
-
-                response.ContentType = "application/json";
-                string rsp_txt = "";
-                byte[] rsp_buff;
-                switch (txt_request)
-                {
-                    case "status":
-                        {
-                            rsp_txt = systemMonitor.getStatusJSON();
-                            break;
-                        }
-                    case "subscribe":
-                        {
-                            string ip = "http://" + json_request["ip"] + ":9520";
-                            if (!listeners.Contains(ip))
-                            {
-                                listeners.Add(ip);
-                                rsp_txt = JsonConvert.SerializeObject(ip + " registered");
-                            }
-                            else
-                            {
-                                rsp_txt = JsonConvert.SerializeObject(ip + " is already registered");
-                            }
-                            new Thread(() =>
-                            {
-                                if (systemMonitor.foregroundProcessMonitor != null)
-                                {
-                                    HttpContent content = new StringContent(JsonConvert.SerializeObject(systemMonitor.foregroundProcessMonitor.foregroundProcessName), Encoding.UTF8, "application/json");
-                                    Debug.WriteLine(systemMonitor.foregroundProcessMonitor.foregroundProcessName);
-                                    client.PostAsync(ip + "/foregroundProcessName", content);
-                                }
-                            }).Start();
-                            break;
-                        }
-                    case "foregroundProcessIcon":
-                        {
-                            string ip = "http://" + json_request["ip"] + ":9520";
-                            if (systemMonitor.foregroundProcessMonitor != null)
-                            {
-                                new Thread(() =>
-                                {
-                                    // Retrieve process name and icon
-                                    Process process = systemMonitor.foregroundProcessMonitor.foregroundProcess;
-                                    string name = null;
-                                    string icon = convertExeIconToBase64(process);
-                                    try
-                                    {
-                                        name = process != null ? process.ProcessName : null;
-                                    }
-                                    catch { }
-                                    // Attempt to send data back to requester
-                                    try
-                                    {
-                                        HttpContent content = new StringContent(JsonConvert.SerializeObject(new string[] { name, icon }), Encoding.UTF8, "application/json");
-                                        client.PostAsync(ip + "/foregroundProcessIcon", content);
-                                    }
-                                    catch { }
-                                }).Start();
-                            }
-                            rsp_txt = JsonConvert.SerializeObject("OK");
-                            break;
-                        }
-                    case "steamLoginUP":
-                        {
-                            string ip = "http://" + json_request["ip"] + ":9520";
-                            new Thread(() =>
-                            {
-                                Steam_Login steamLoginForm = new Steam_Login(ip);
-                                steamLoginForm.sendSteamLogin = this.sendSteamLoginUsernameAndPassword;
-                                Application.Run(steamLoginForm);
-                                steamLoginForm.Dispose();
-                            }).Start();
-                            rsp_txt = JsonConvert.SerializeObject("OK");
-                            Debug.WriteLine("Steam login data request");
-                            break;
-                        }
-                    case "steamLogin2FA":
-                        {
-                            string ip = "http://" + json_request["ip"] + ":9520";
-                            new Thread(() =>
-                            {
-                                Steam_2FA steam2faForm = new Steam_2FA(ip);
-                                steam2faForm.sendSteam2FA = this.sendSteam2FA;
-                                Application.Run(steam2faForm);
-                                steam2faForm.Dispose();
-                            }).Start();
-                            rsp_txt = JsonConvert.SerializeObject("OK");
-                            Debug.WriteLine("Steam 2FA data request");
-                            break;
-                        }
-                    case "powerPlan":
-                        {
-                            string plan = json_request["name"];
-                            Debug.WriteLine("Power Plan switch: " + plan);
-                            powerPlanManager.applyPowerPlan(plan);
-                            rsp_txt = JsonConvert.SerializeObject("OK");
-                            break;
-                        }
-                    case "audioProfile":
-                        {
-                            string playbackDevice = json_request["devices"]["playbackDevice"];
-                            string playbackCommunicationDevice = json_request["devices"]["playbackDeviceCommunication"];
-                            string recordingDevice = json_request["devices"]["recordingDevice"];
-                            AudioManager.switchDeviceTo(playbackDevice, 1);
-                            AudioManager.switchDeviceTo(playbackCommunicationDevice, 2);
-                            AudioManager.switchDeviceTo(recordingDevice, 1);
-                            AudioManager.switchDeviceTo(recordingDevice, 2);
-                            rsp_txt = JsonConvert.SerializeObject("OK");
-                            break;
-                        }
-                    default:
-                        {
-                            rsp_txt = JsonConvert.SerializeObject("Unknown");
-                            break;
-                        }
-                }
-                rsp_buff = System.Text.Encoding.UTF8.GetBytes(rsp_txt);
-
-                try
-                {
-                    response.Headers.Add(HttpResponseHeader.CacheControl, "private, no-store");
-                    response.ContentLength64 = rsp_buff.Length;
-                    response.OutputStream.Write(rsp_buff, 0, rsp_buff.Length);
-                    response.StatusCode = (int)HttpStatusCode.OK;
-                    response.OutputStream.Close();
-                    response.Close();
+                    listener.m.WaitOne();
+                    listener.writer.WriteLine("[\"status\"," + systemMonitor.getStatusJSON() + "]");
+                    listener.writer.Flush();
+                    listener.m.ReleaseMutex();
                 }
                 catch { }
             }
@@ -232,37 +204,18 @@ namespace Ryder_Engine.Components
 
         public void sendForegroundProcessToListener(object sender, string name)
         {
-            foreach (var ip in listeners)
+            Debug.WriteLine("Foreground Process: " + name);
+            foreach (Listener listener in listeners)
             {
                 try
                 {
-                    HttpContent content = new StringContent(JsonConvert.SerializeObject(name), Encoding.UTF8, "application/json");
-                    client.PostAsync(ip + "/foregroundProcessName", content);
+                    listener.m.WaitOne();
+                    listener.writer.WriteLine("[\"foregroundProcessName\"," + name + "]");
+                    listener.writer.Flush();
+                    listener.m.ReleaseMutex();
                 }
                 catch { }
             }
-        }
-
-        public void sendSteamLoginUsernameAndPassword(object sender, string[] formData)
-        {
-            try
-            {
-                string[] data = { formData[0], formData[1] };
-                HttpContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
-                client.PostAsync(formData[2] + "/steamLogin", content);
-            }
-            catch { }
-        }
-
-        public void sendSteam2FA(object sender, string[] formData)
-        {
-            try
-            {
-                string data = formData[0];
-                HttpContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
-                client.PostAsync(formData[1] + "/steam2fa", content);
-            }
-            catch { }
         }
 
         private string convertExeIconToBase64(Process p)

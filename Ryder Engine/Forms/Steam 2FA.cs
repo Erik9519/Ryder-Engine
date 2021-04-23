@@ -1,30 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
+using System.IO;
 using System.Windows.Forms;
+using static Ryder_Engine.Components.Server;
 
 namespace Ryder_Engine.Forms
 {
     public partial class Steam_2FA : Form
     {
-        public EventHandler<string[]> sendSteam2FA;
-        private string ip;
+        public EventHandler<object[]> sendSteam2FA;
+        private Listener listener;
 
-        public Steam_2FA(string ip)
+        public Steam_2FA(Listener listener)
         {
             InitializeComponent();
-            this.ip = ip;
+            this.listener = listener;
             this.TopLevel = true;
             this.Focus();
         }
 
         private void loginButton_Click(object sender, EventArgs e)
         {
-            string[] vals = { codeTextBox.Text, ip };
-            sendSteam2FA(this, vals);
+            try
+            {
+                listener.m.WaitOne();
+                listener.writer.WriteLine("[\"steamLogin2FA\",\"" + codeTextBox.Text + "\"]");
+                listener.writer.Flush();
+                listener.m.ReleaseMutex();
+            }
+            catch { }
             this.Close();
         }
     }

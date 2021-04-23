@@ -99,59 +99,57 @@ namespace Ryder_Engine.Components
 
         public string getStatusJSON()
         {
-            string res = "{\n";
+            string res = "{";
             bool hasPrevious = false;
             // MSI
             if (this.msiMonitor != null) {
-                res += "\t\"msi\": {\n";
+                res += "\"msi\":{";
                 for (ushort i = 0; i < msiMonitor.sensors.Length; i++)
                 {
-                    res += "\t\t\"" + msiMonitor.sensors[i].name + "\": " + ((int)msiMonitor.sensors[i].value).ToString();
+                    res += "\"" + msiMonitor.sensors[i].name + "\":" + ((int)msiMonitor.sensors[i].value).ToString();
                     if (i < msiMonitor.sensors.Length - 1) res += ",";
-                    res += "\n";
                 }
-                res += "\t}";
+                res += "}";
                 hasPrevious = true;
             }
             // Network
             if (this.networkMonitor != null)
             {
-                if (hasPrevious) res += ",\n";
-                res += "\t\"network\": {\n";
-                res += "\t\t\"downloadSpeed\": " + networkMonitor.status.downloadSpeed.ToString() + ",\n";
-                res += "\t\t\"uploadSpeed\": " + networkMonitor.status.uploadSpeed.ToString() + "\n";
-                res += "\t}";
+                if (hasPrevious) res += ",";
+                res += "\"network\":{";
+                res += "\"downloadSpeed\":" + networkMonitor.status.downloadSpeed.ToString() + ",";
+                res += "\"uploadSpeed\":" + networkMonitor.status.uploadSpeed.ToString();
+                res += "}";
                 hasPrevious = true;
             }
             // Storage
             if (this.storageMonitor != null)
             {
-                if (hasPrevious) res += ",\n";
-                res += "\t\"storage\": {\n";
+                if (hasPrevious) res += ",";
+                res += "\"storage\":{";
                 for (ushort i = 0; i < storageMonitor.drives.Length; i++)
                 {
-                    res += "\t\t\"" + storageMonitor.drives[i].letter + "\": {\n";
-                    res += "\t\t\t\"readSpeed\": " + storageMonitor.drives[i].readSpeed + ",\n";
-                    res += "\t\t\t\"writeSpeed\": " + storageMonitor.drives[i].writeSpeed + "\n";
-                    res += "\t\t}";
+                    res += "\"" + storageMonitor.drives[i].letter + "\":{";
+                    res += "\"readSpeed\":" + storageMonitor.drives[i].readSpeed + ",";
+                    res += "\"writeSpeed\":" + storageMonitor.drives[i].writeSpeed;
+                    res += "}";
                     if (i < storageMonitor.drives.Length - 1) res += ",";
-                    res += "\n";
                 }
-                res += "\t}";
+                res += "}";
                 hasPrevious = true;
             }
             // Fan Controller
             if (this.fanController != null)
             {
-                if (hasPrevious) res += ",\n";
-                res += "\t\"fanController\": {\n";
-                res += "\t\t\"ambient\": " + fanController.ambient.ToString() + ",\n";
-                res += "\t\t\"liquid\": " + fanController.liquid.ToString() + "\n";
-                res += "\t}";
+                if (hasPrevious) res += ",";
+                res += "\"fanController\":{";
+                res += "\"ambient\":" + fanController.ambient.ToString() + ",";
+                res += "\"liquid\":" + fanController.liquid.ToString();
+                res += "}";
                 hasPrevious = true;
             }
             // End
-            res += "\n}";
+            res += "}";
             return res;
         }
     }
