@@ -30,6 +30,7 @@ namespace Ryder_Engine.Components
         private TcpListener listener;
 
         private List<Listener> listeners = new List<Listener>();
+        private Mutex listeners_m = new Mutex();
         private bool _stop = false;
         private SystemMonitor systemMonitor;
         private PowerPlanManager powerPlanManager;
@@ -51,8 +52,12 @@ namespace Ryder_Engine.Components
                 TcpClient client;
                 while (!_stop)
                 {
-                    client = listener.AcceptTcpClient();
-                    ThreadPool.QueueUserWorkItem(handleClient, client);
+                    try
+                    {
+                        client = listener.AcceptTcpClient();
+                        ThreadPool.QueueUserWorkItem(handleClient, client);
+                    }
+                    catch { }
                 }
             }).Start();
         }
@@ -73,7 +78,10 @@ namespace Ryder_Engine.Components
             StreamReader reader = new StreamReader(stream);
             listener.writer = new StreamWriter(stream);
             listener.writer.NewLine = "\n";
+
+            listeners_m.WaitOne();
             listeners.Add(listener);
+            listeners_m.ReleaseMutex();
 
             while (!_stop && client.Connected)
             {
@@ -189,6 +197,7 @@ namespace Ryder_Engine.Components
 
         public void sendDataToListeners()
         {
+            listeners_m.WaitOne();
             foreach (Listener listener in listeners)
             {
                 try
@@ -200,6 +209,7 @@ namespace Ryder_Engine.Components
                 }
                 catch { }
             }
+            listeners_m.ReleaseMutex();
         }
 
         public void sendForegroundProcessToListener(object sender, string name)
