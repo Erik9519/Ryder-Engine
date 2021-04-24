@@ -97,10 +97,7 @@ namespace Ryder_Engine.Components
                             {
                                 try
                                 {
-                                    listener.m.WaitOne();
-                                    listener.writer.WriteLine("[\"status\"," + systemMonitor.getStatusJSON() + "]");
-                                    listener.writer.Flush();
-                                    listener.m.ReleaseMutex();
+                                    sendMsg("[\"status\"," + systemMonitor.getStatusJSON() + "]", listener);
                                 }
                                 catch { }
                                 break;
@@ -113,10 +110,7 @@ namespace Ryder_Engine.Components
                                     string name = "null";
                                     name = process != null ? ("\"" + process.ProcessName + "\"") : null;
 
-                                    listener.m.WaitOne();
-                                    listener.writer.WriteLine("[\"foregroundProcessName\"," + name + "]");
-                                    listener.writer.Flush();
-                                    listener.m.ReleaseMutex();
+                                    sendMsg("[\"foregroundProcessName\"," + name + "]", listener);
                                 }
                                 catch { }
                                 break;
@@ -138,10 +132,7 @@ namespace Ryder_Engine.Components
                                 try
                                 {
                                     Debug.WriteLine("Foreground Process Icon: " + name);
-                                    listener.m.WaitOne();
-                                    listener.writer.WriteLine("[\"foregroundProcessIcon\"," + name + "," + icon + "]");
-                                    listener.writer.Flush();
-                                    listener.m.ReleaseMutex();
+                                    sendMsg("[\"foregroundProcessIcon\"," + name + "," + icon + "]", listener);
                                 }
                                 catch { }
                                 break;
@@ -189,8 +180,9 @@ namespace Ryder_Engine.Components
                 }
                 catch { }
             }
-
+            listeners_m.WaitOne();
             listeners.Remove(listener);
+            listeners_m.ReleaseMutex();
             stream.Close();
             client.Close();
         }
@@ -202,10 +194,7 @@ namespace Ryder_Engine.Components
             {
                 try
                 {
-                    listener.m.WaitOne();
-                    listener.writer.WriteLine("[\"status\"," + systemMonitor.getStatusJSON() + "]");
-                    listener.writer.Flush();
-                    listener.m.ReleaseMutex();
+                    sendMsg("[\"status\"," + systemMonitor.getStatusJSON() + "]", listener);
                 }
                 catch { }
             }
@@ -219,10 +208,7 @@ namespace Ryder_Engine.Components
             {
                 try
                 {
-                    listener.m.WaitOne();
-                    listener.writer.WriteLine("[\"foregroundProcessName\"," + name + "]");
-                    listener.writer.Flush();
-                    listener.m.ReleaseMutex();
+                    sendMsg("[\"foregroundProcessName\"," + name + "]", listener);
                 }
                 catch { }
             }
@@ -256,6 +242,18 @@ namespace Ryder_Engine.Components
                 Debug.WriteLine("Exception: " + e.Message);
             }
             return null;
+        }
+
+        private void sendMsg(string msg, Listener listener)
+        {
+            listener.m.WaitOne();
+            string length = String.Format("{0,8}", (msg.Length + 1));
+            Debug.WriteLine("msg_len: " + length);
+            listener.writer.WriteLine(length);
+            listener.writer.Flush();
+            listener.writer.WriteLine(msg);
+            listener.writer.Flush();
+            listener.m.ReleaseMutex();
         }
     }
 }
