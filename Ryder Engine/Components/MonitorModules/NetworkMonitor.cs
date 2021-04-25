@@ -34,7 +34,7 @@ namespace Ryder_Engine.Components.MonitorModules
             {
                 long val_d, val_u;
                 try { val_d = interfaces[i].GetIPv4Statistics().BytesReceived; } catch { val_d = 0; }
-                try { val_u = interfaces[i].GetIPv4Statistics().BytesSent } catch { val_u = 0; }
+                try { val_u = interfaces[i].GetIPv4Statistics().BytesSent; } catch { val_u = 0; }
 
                 status.downloadSpeed += val_d - interfaces_received_bytes[i];
                 status.uploadSpeed += val_u - interfaces_sent_bytes[i];

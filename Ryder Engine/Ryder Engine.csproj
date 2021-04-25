@@ -11,7 +11,7 @@
     <PackageId>Ryder_Engine</PackageId>
     <ApplicationIcon>Resources\Icon.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <PackageProjectUrl>https://github.com/Erik9519/Ryder-Engine</PackageProjectUrl>
     <Authors>Erik Ussin</Authors>
   </PropertyGroup>
