@@ -20,14 +20,7 @@ namespace Ryder_Engine
 
         private void loginButton_Click(object sender, EventArgs e)
         {
-            try
-            {
-                listener.m.WaitOne();
-                listener.writer.WriteLine("[\"steamLoginUP\",\"" + usernameTextBox.Text + "\",\"" + passwordTextBox.Text + "\"]");
-                listener.writer.Flush();
-                listener.m.ReleaseMutex();
-            }
-            catch { }
+            listener.sendMsg("[\"steamLogin\",\"" + usernameTextBox.Text + "\",\"" + passwordTextBox.Text + "\"]");
             this.Close();
         }
 
