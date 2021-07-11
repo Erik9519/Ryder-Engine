@@ -130,6 +130,7 @@ namespace Ryder_Engine.Components
                 for (ushort i = 0; i < storageMonitor.drives.Length; i++)
                 {
                     res += "\"" + storageMonitor.drives[i].letter + "\":{";
+                    res += "\"activity\":" + storageMonitor.drives[i].activity + ",";
                     res += "\"readSpeed\":" + storageMonitor.drives[i].readSpeed + ",";
                     res += "\"writeSpeed\":" + storageMonitor.drives[i].writeSpeed;
                     res += "}";

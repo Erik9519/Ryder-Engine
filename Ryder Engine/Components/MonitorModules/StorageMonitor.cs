@@ -10,12 +10,14 @@ namespace Ryder_Engine.Components.MonitorModules
         public struct Drive
         {
             public char letter;
+            public float activity;
             public float readSpeed;
             public float writeSpeed;
         }
 
         public Drive[] drives;
 
+        private PerformanceCounter[] diskActivity;
         private PerformanceCounter[] diskRead;
         private PerformanceCounter[] diskWrite;
 
@@ -23,6 +25,7 @@ namespace Ryder_Engine.Components.MonitorModules
         {
             // Disk Activity
             string category = "PhysicalDisk";
+            string activityCounterName = "% Disk Time";
             string readCounterName = "Disk Read Bytes/sec";
             string writeCounterName = "Disk Write Bytes/sec";
             // Check Drive types
@@ -62,11 +65,13 @@ namespace Ryder_Engine.Components.MonitorModules
             }
             //// Setup
             drives = new Drive[instNames.Count];
+            diskActivity = new PerformanceCounter[instNames.Count];
             diskRead = new PerformanceCounter[instNames.Count];
             diskWrite = new PerformanceCounter[instNames.Count];
             for (int i = 0; i < instNames.Count; i++)
             {
                 drives[i].letter = instNames[i].Substring(instNames[i].Length - 2, 1).ToCharArray()[0];
+                diskActivity[i] = new PerformanceCounter(category, activityCounterName, instNames[i]);
                 diskRead[i] = new PerformanceCounter(category, readCounterName, instNames[i]);
                 diskWrite[i] = new PerformanceCounter(category, writeCounterName, instNames[i]);
             }
@@ -79,6 +84,7 @@ namespace Ryder_Engine.Components.MonitorModules
         {
             for (short i = 0; i < diskRead.Length; i++)
             {
+                drives[i].activity = diskActivity[i].NextValue();
                 drives[i].readSpeed = diskRead[i].NextValue() / 1024f / 1024f;
                 drives[i].writeSpeed = diskWrite[i].NextValue() / 1024f / 1024f;
             }
@@ -88,6 +94,7 @@ namespace Ryder_Engine.Components.MonitorModules
         {
             for (short i = 0; i < diskRead.Length; i++)
             {
+                diskActivity[i].Dispose();
                 diskRead[i].Dispose();
                 diskWrite[i].Dispose();
             }
