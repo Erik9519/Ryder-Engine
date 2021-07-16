@@ -36,6 +36,8 @@ namespace Ryder_Engine.Forms
             this.comPortMonitorCheckBox = new System.Windows.Forms.CheckBox();
             this.applyButton = new System.Windows.Forms.Button();
             this.comPort_comboBox = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.pswTextBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // msiCheckBox
@@ -90,7 +92,7 @@ namespace Ryder_Engine.Forms
             // 
             // applyButton
             // 
-            this.applyButton.Location = new System.Drawing.Point(83, 155);
+            this.applyButton.Location = new System.Drawing.Point(84, 175);
             this.applyButton.Name = "applyButton";
             this.applyButton.Size = new System.Drawing.Size(75, 23);
             this.applyButton.TabIndex = 5;
@@ -106,11 +108,30 @@ namespace Ryder_Engine.Forms
             this.comPort_comboBox.Size = new System.Drawing.Size(72, 23);
             this.comPort_comboBox.TabIndex = 6;
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(10, 143);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(57, 15);
+            this.label1.TabIndex = 7;
+            this.label1.Text = "Password";
+            // 
+            // pswTextBox
+            // 
+            this.pswTextBox.Location = new System.Drawing.Point(73, 139);
+            this.pswTextBox.MaxLength = 15;
+            this.pswTextBox.Name = "pswTextBox";
+            this.pswTextBox.Size = new System.Drawing.Size(158, 23);
+            this.pswTextBox.TabIndex = 8;
+            // 
             // Settings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(243, 192);
+            this.ClientSize = new System.Drawing.Size(243, 208);
+            this.Controls.Add(this.pswTextBox);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.comPort_comboBox);
             this.Controls.Add(this.applyButton);
             this.Controls.Add(this.comPortMonitorCheckBox);
@@ -138,5 +159,7 @@ namespace Ryder_Engine.Forms
         private System.Windows.Forms.CheckBox comPortMonitorCheckBox;
         private System.Windows.Forms.Button applyButton;
         private System.Windows.Forms.ComboBox comPort_comboBox;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox pswTextBox;
     }
 }

@@ -22,6 +22,7 @@ namespace Ryder_Engine.Components
         {
             private Mutex m;
             private StreamWriter writer;
+            public bool authenticated = false;
 
             public Listener(NetworkStream stream)
             {
@@ -32,21 +33,25 @@ namespace Ryder_Engine.Components
 
             public bool sendMsg(string msg)
             {
-                try
+                if (authenticated)
                 {
-                    m.WaitOne();
-                    string length = String.Format("{0,8}", (msg.Length + 1));
-                    writer.WriteLine(length);
-                    writer.Flush();
-                    writer.WriteLine(msg);
-                    writer.Flush();
-                    m.ReleaseMutex();
-                    return true;
-                } catch
-                {
-                    m.ReleaseMutex();
-                    return false;
+                    try
+                    {
+                        m.WaitOne();
+                        string length = String.Format("{0,8}", (msg.Length + 1));
+                        writer.WriteLine(length);
+                        writer.Flush();
+                        writer.WriteLine(msg);
+                        writer.Flush();
+                        m.ReleaseMutex();
+                        return true;
+                    }
+                    catch
+                    {
+                        m.ReleaseMutex();
+                    }
                 }
+                return false;
             }
         }
 
@@ -101,10 +106,12 @@ namespace Ryder_Engine.Components
             Listener listener = new Listener(stream);
             StreamReader reader = new StreamReader(stream);
 
+            // Add Listener to List
             listeners_m.WaitOne();
             listeners.Add(listener);
             listeners_m.ReleaseMutex();
 
+            // Process Listener commands
             while (!_stop && client.Connected)
             {
                 try
@@ -115,6 +122,21 @@ namespace Ryder_Engine.Components
 
                     switch (json_request[0])
                     {
+                        case "authCode":
+                            {
+                                try
+                                {
+                                    string psw = json_request[1];
+                                    if (Properties.Settings.Default.Password == psw)
+                                    {
+                                        listener.authenticated = true;
+                                        // Notify Client
+                                        listener.sendMsg("[\"authenticated\"]");
+                                    }
+                                }
+                                catch { }
+                                break;
+                            }
                         case "status":
                             {
                                 try

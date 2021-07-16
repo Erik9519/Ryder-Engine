@@ -18,6 +18,7 @@ namespace Ryder_Engine.Forms
             networkMonitorCheckBox.Checked = Properties.Settings.Default.NetworkMonitor_module;
             storageMonitorCheckBox.Checked = Properties.Settings.Default.StorageMonitor_module;
             comPortMonitorCheckBox.Checked = Properties.Settings.Default.COMPortMonitor_module;
+            pswTextBox.Text = Properties.Settings.Default.Password;
 
             string[] ports = SerialPort.GetPortNames();
             short index = -1;
@@ -43,6 +44,7 @@ namespace Ryder_Engine.Forms
             Properties.Settings.Default.StorageMonitor_module = storageMonitorCheckBox.Checked;
             Properties.Settings.Default.COMPortMonitor_module = comPortMonitorCheckBox.Checked;
             Properties.Settings.Default.COMPort = comPort_comboBox.Text;
+            Properties.Settings.Default.Password = pswTextBox.Text;
             Properties.Settings.Default.Save();
             systemMonitor.applySettings();
             this.Close();
