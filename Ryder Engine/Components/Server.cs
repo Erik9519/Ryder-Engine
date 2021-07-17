@@ -120,106 +120,112 @@ namespace Ryder_Engine.Components
                     Debug.WriteLine(data);
                     string[] json_request = JsonConvert.DeserializeObject<string[]>(data);
 
-                    switch (json_request[0])
-                    {
-                        case "authCode":
-                            {
-                                try
+                    if (!listener.authenticated) {
+                        switch (json_request[0])
+                        {
+                            case "authCode":
                                 {
-                                    string psw = json_request[1];
-                                    if (Properties.Settings.Default.Password == psw)
+                                    try
                                     {
-                                        listener.authenticated = true;
-                                        // Notify Client
-                                        listener.sendMsg("[\"authenticated\"]");
+                                        string psw = json_request[1];
+                                        if (Properties.Settings.Default.Password == psw)
+                                        {
+                                            listener.authenticated = true;
+                                            // Notify Client
+                                            listener.sendMsg("[\"authenticated\"]");
+                                        }
                                     }
+                                    catch { }
+                                    break;
                                 }
-                                catch { }
-                                break;
-                            }
-                        case "status":
-                            {
-                                try
+                        }
+                    } else {
+                        switch (json_request[0])
+                        {
+                            case "status":
                                 {
-                                    listener.sendMsg("[\"status\"," + systemMonitor.getStatusJSON() + "]");
+                                    try
+                                    {
+                                        listener.sendMsg("[\"status\"," + systemMonitor.getStatusJSON() + "]");
+                                    }
+                                    catch { }
+                                    break;
                                 }
-                                catch { }
-                                break;
-                            }
-                        case "foregroundProcessName":
-                            {
-                                try
+                            case "foregroundProcessName":
                                 {
+                                    try
+                                    {
+                                        Process process = systemMonitor.foregroundProcessMonitor.foregroundProcess;
+                                        string name = "null";
+                                        name = process != null ? ("\"" + process.ProcessName + "\"") : null;
+
+                                        listener.sendMsg("[\"foregroundProcessName\"," + name + "]");
+                                    }
+                                    catch { }
+                                    break;
+                                }
+                            case "foregroundProcessIcon":
+                                {
+                                    // Retrieve process name and icon
                                     Process process = systemMonitor.foregroundProcessMonitor.foregroundProcess;
                                     string name = "null";
-                                    name = process != null ? ("\"" + process.ProcessName + "\"") : null;
-
-                                    listener.sendMsg("[\"foregroundProcessName\"," + name + "]");
+                                    string icon = "null";
+                                    try
+                                    {
+                                        name = process != null ? ("\"" + process.ProcessName + "\"") : null;
+                                        string icon_t = convertExeIconToBase64(process);
+                                        if (icon_t != null) icon = "\"" + icon_t + "\"";
+                                    }
+                                    catch { }
+                                    // Attempt to send data back to requester
+                                    try
+                                    {
+                                        Debug.WriteLine("Foreground Process Icon: " + name);
+                                        listener.sendMsg("[\"foregroundProcessIcon\"," + name + "," + icon + "]");
+                                    }
+                                    catch { }
+                                    break;
                                 }
-                                catch { }
-                                break;
-                            }
-                        case "foregroundProcessIcon":
-                            {
-                                // Retrieve process name and icon
-                                Process process = systemMonitor.foregroundProcessMonitor.foregroundProcess;
-                                string name = "null";
-                                string icon = "null";
-                                try
+                            case "steamLogin":
                                 {
-                                    name = process != null ? ("\"" + process.ProcessName + "\"") : null;
-                                    string icon_t = convertExeIconToBase64(process);
-                                    if (icon_t != null) icon = "\"" + icon_t + "\"";
+                                    new Task(() =>
+                                    {
+                                        Steam_Login steamLoginForm = new Steam_Login(listener);
+                                        Application.Run(steamLoginForm);
+                                        steamLoginForm.Dispose();
+                                    }).Start();
+                                    Debug.WriteLine("Steam login data request");
+                                    break;
                                 }
-                                catch { }
-                                // Attempt to send data back to requester
-                                try
+                            case "steam2fa":
                                 {
-                                    Debug.WriteLine("Foreground Process Icon: " + name);
-                                    listener.sendMsg("[\"foregroundProcessIcon\"," + name + "," + icon + "]");
+                                    new Task(() =>
+                                    {
+                                        Steam_2FA steam2faForm = new Steam_2FA(listener);
+                                        Application.Run(steam2faForm);
+                                        steam2faForm.Dispose();
+                                    }).Start();
+                                    Debug.WriteLine("Steam 2FA data request");
+                                    break;
                                 }
-                                catch { }
-                                break;
-                            }
-                        case "steamLogin":
-                            {
-                                new Task(() =>
+                            case "powerPlan":
                                 {
-                                    Steam_Login steamLoginForm = new Steam_Login(listener);
-                                    Application.Run(steamLoginForm);
-                                    steamLoginForm.Dispose();
-                                }).Start();
-                                Debug.WriteLine("Steam login data request");
-                                break;
-                            }
-                        case "steam2fa":
-                            {
-                                new Task(() =>
+                                    powerPlanManager.applyPowerPlan(json_request[1]);
+                                    break;
+                                }
+                            case "audioProfile":
                                 {
-                                    Steam_2FA steam2faForm = new Steam_2FA(listener);
-                                    Application.Run(steam2faForm);
-                                    steam2faForm.Dispose();
-                                }).Start();
-                                Debug.WriteLine("Steam 2FA data request");
-                                break;
-                            }
-                        case "powerPlan":
-                            {
-                                powerPlanManager.applyPowerPlan(json_request[1]);
-                                break;
-                            }
-                        case "audioProfile":
-                            {
-                                AudioManager.switchDeviceTo(json_request[1], 1);
-                                AudioManager.switchDeviceTo(json_request[2], 2);
-                                AudioManager.switchDeviceTo(json_request[3], 1);
-                                AudioManager.switchDeviceTo(json_request[3], 2);
-                                break;
-                            }
-                        default:
-                            {
-                                break;
-                            }
+                                    AudioManager.switchDeviceTo(json_request[1], 1);
+                                    AudioManager.switchDeviceTo(json_request[2], 2);
+                                    AudioManager.switchDeviceTo(json_request[3], 1);
+                                    AudioManager.switchDeviceTo(json_request[3], 2);
+                                    break;
+                                }
+                            default:
+                                {
+                                    break;
+                                }
+                        }
                     }
                 }
                 catch { }
