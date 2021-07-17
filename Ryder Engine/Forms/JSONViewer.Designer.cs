@@ -72,6 +72,7 @@ namespace Ryder_Engine.Forms
             this.ControlBox = false;
             this.Controls.Add(this.jsonPanel);
             this.Controls.Add(this.closeButton);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.Name = "JSONViewer";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
