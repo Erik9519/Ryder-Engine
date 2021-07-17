@@ -117,8 +117,8 @@ namespace Ryder_Engine.Components
             {
                 if (hasPrevious) res += ",";
                 res += "\"network\":{";
-                res += "\"downloadSpeed\":" + networkMonitor.status.downloadSpeed.ToString() + ",";
-                res += "\"uploadSpeed\":" + networkMonitor.status.uploadSpeed.ToString();
+                res += "\"downloadSpeed\":" + networkMonitor.status.downloadSpeed.ToString("0.##") + ",";
+                res += "\"uploadSpeed\":" + networkMonitor.status.uploadSpeed.ToString("0.##");
                 res += "}";
                 hasPrevious = true;
             }
@@ -130,9 +130,9 @@ namespace Ryder_Engine.Components
                 for (ushort i = 0; i < storageMonitor.drives.Length; i++)
                 {
                     res += "\"" + storageMonitor.drives[i].letter + "\":{";
-                    res += "\"activity\":" + storageMonitor.drives[i].activity + ",";
-                    res += "\"readSpeed\":" + storageMonitor.drives[i].readSpeed + ",";
-                    res += "\"writeSpeed\":" + storageMonitor.drives[i].writeSpeed;
+                    res += "\"activity\":" + ((int)storageMonitor.drives[i].activity).ToString() + ",";
+                    res += "\"readSpeed\":" + storageMonitor.drives[i].readSpeed.ToString("0.##") + ",";
+                    res += "\"writeSpeed\":" + storageMonitor.drives[i].writeSpeed.ToString("0.##");
                     res += "}";
                     if (i < storageMonitor.drives.Length - 1) res += ",";
                 }

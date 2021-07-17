@@ -326,7 +326,7 @@ namespace Ryder_Engine.Utils
             return hIcon;
         }
 
-        public unsafe static Bitmap ClipToCircle(Bitmap srcImage, int resolution = 96)
+        public unsafe static Bitmap ProcessIcon(Bitmap srcImage, int resolution = 96, bool clipToCircle = true)
         {
             BitmapData imageData = srcImage.LockBits(
                 new Rectangle(0, 0, srcImage.Width, srcImage.Height),
@@ -404,9 +404,12 @@ namespace Ryder_Engine.Utils
                 }
 
                 // adds the new ellipse & draws the image again 
-                GraphicsPath path = new GraphicsPath();
-                path.AddEllipse(r);
-                g.SetClip(path);
+                if (clipToCircle)
+                {
+                    GraphicsPath path = new GraphicsPath();
+                    path.AddEllipse(r);
+                    g.SetClip(path);
+                }
                 int ofst = (high_gap - low_gap) / 2;
                 g.DrawImage(srcImage, ofst, ofst);
                 srcImage.Dispose();

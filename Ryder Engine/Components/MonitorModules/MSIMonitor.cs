@@ -16,6 +16,15 @@ namespace Ryder_Engine.Components.MonitorModules
         public void update()
         {
             sensors = msi.getSensors();
+            for (short i = 0; i < sensors.Length; i++)
+            {
+                // MSI outputs the GPU voltage in V but we require mV as the readings must be integers
+                if (sensors[i].name.Contains("voltage") && sensors[i].name.Contains("GPU"))
+                {
+                    sensors[i].value *= 1000;
+                }
+            }
+
         }
     }
 }

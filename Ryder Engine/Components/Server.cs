@@ -278,7 +278,7 @@ namespace Ryder_Engine.Components
                     ImageConverter converter = new ImageConverter();
                     using (Bitmap ico = ((Icon)Icon.FromHandle(hIcon).Clone()).ToBitmap())
                     {
-                        Bitmap bitmap = IconExtractor.ClipToCircle(ico);
+                        Bitmap bitmap = IconExtractor.ProcessIcon(ico);
                         result = Convert.ToBase64String((byte[])converter.ConvertTo(bitmap, typeof(byte[])));
                         bitmap.Dispose();
                     }

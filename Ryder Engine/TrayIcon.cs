@@ -18,7 +18,10 @@ namespace Ryder_Engine
         SystemMonitor systemMonitor;
         PowerPlanManager powerPlanManager;
         Server server;
+
+        // Forms
         Forms.Settings settings;
+        Forms.JSONViewer jsonViewer;
 
         public TrayIcon()
         {
@@ -38,16 +41,31 @@ namespace Ryder_Engine
             notifyIcon.Icon = icon;
             notifyIcon.Text = "Ryder Engine";
             notifyIcon.ContextMenuStrip = new ContextMenuStrip();
+            notifyIcon.ContextMenuStrip.Items.Add("Data Viewer");
+            notifyIcon.ContextMenuStrip.Items[0].Click += openDataViewer;
             notifyIcon.ContextMenuStrip.Items.Add("Settings");
-            notifyIcon.ContextMenuStrip.Items[0].Click += openSettings; ;
+            notifyIcon.ContextMenuStrip.Items[1].Click += openSettings;
             notifyIcon.ContextMenuStrip.Items.Add("Close");
-            notifyIcon.ContextMenuStrip.Items[1].Click += close;
+            notifyIcon.ContextMenuStrip.Items[2].Click += close;
             notifyIcon.Visible = true;
             // Initialize interrupt timer
             timer = new Timer();
             timer.Interval = 1000;
             timer.Tick += systemMonitorUpdate;
             timer.Start();
+        }
+
+        private void openDataViewer(object sender, EventArgs e)
+        {
+            if (jsonViewer == null || jsonViewer.IsDisposed)
+            {
+                jsonViewer = new Forms.JSONViewer(systemMonitor);
+                jsonViewer.Show();
+            }
+            else
+            {
+                jsonViewer.BringToFront();
+            }
         }
 
         private void openSettings(object sender, EventArgs e)
@@ -66,6 +84,10 @@ namespace Ryder_Engine
         {
             systemMonitor.update();
             server.sendDataToListeners();
+            if (!(jsonViewer == null || jsonViewer.IsDisposed))
+            {
+                jsonViewer.updateData();
+            }
         }
 
         private void close(object sender, EventArgs e)
