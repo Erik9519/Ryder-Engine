@@ -106,5 +106,60 @@ namespace Ryder_Engine.Properties {
                 this["Password"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Specialized.StringCollection Apps_path {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["Apps_path"]));
+            }
+            set {
+                this["Apps_path"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Specialized.StringCollection Apps_args {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["Apps_args"]));
+            }
+            set {
+                this["Apps_args"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Specialized.StringCollection Apps_pos_x {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["Apps_pos_x"]));
+            }
+            set {
+                this["Apps_pos_x"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Specialized.StringCollection Apps_pos_y {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["Apps_pos_y"]));
+            }
+            set {
+                this["Apps_pos_y"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Specialized.StringCollection Apps_icons {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["Apps_icons"]));
+            }
+            set {
+                this["Apps_icons"] = value;
+            }
+        }
     }
 }

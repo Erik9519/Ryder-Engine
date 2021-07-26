@@ -20,8 +20,9 @@ namespace Ryder_Engine
         Server server;
 
         // Forms
-        Forms.Settings settings;
         Forms.JSONViewer jsonViewer;
+        Forms.App_Launcher appLauncher;
+        Forms.Settings settings;
 
         public TrayIcon()
         {
@@ -43,10 +44,12 @@ namespace Ryder_Engine
             notifyIcon.ContextMenuStrip = new ContextMenuStrip();
             notifyIcon.ContextMenuStrip.Items.Add("Data Viewer");
             notifyIcon.ContextMenuStrip.Items[0].Click += openDataViewer;
+            notifyIcon.ContextMenuStrip.Items.Add("App Launcher");
+            notifyIcon.ContextMenuStrip.Items[1].Click += openAppLauncher;
             notifyIcon.ContextMenuStrip.Items.Add("Settings");
-            notifyIcon.ContextMenuStrip.Items[1].Click += openSettings;
+            notifyIcon.ContextMenuStrip.Items[2].Click += openSettings;
             notifyIcon.ContextMenuStrip.Items.Add("Close");
-            notifyIcon.ContextMenuStrip.Items[2].Click += close;
+            notifyIcon.ContextMenuStrip.Items[3].Click += close;
             notifyIcon.Visible = true;
             // Initialize interrupt timer
             timer = new Timer();
@@ -65,6 +68,20 @@ namespace Ryder_Engine
             else
             {
                 jsonViewer.BringToFront();
+            }
+        }
+
+        private void openAppLauncher(object sender, EventArgs e)
+        {
+            if (appLauncher == null || appLauncher.IsDisposed)
+            {
+                appLauncher = new Forms.App_Launcher();
+                appLauncher.appLauncherUpdated = server.notifyListenersAppLauncherUpdate;
+                appLauncher.Show();
+            }
+            else
+            {
+                appLauncher.BringToFront();
             }
         }
 

@@ -127,8 +127,7 @@ namespace Ryder_Engine.Components
                                 {
                                     try
                                     {
-                                        string psw = json_request[1];
-                                        if (Properties.Settings.Default.Password == psw)
+                                        if (Properties.Settings.Default.Password == json_request[1])
                                         {
                                             listener.authenticated = true;
                                             // Notify Client
@@ -221,6 +220,16 @@ namespace Ryder_Engine.Components
                                     AudioManager.switchDeviceTo(json_request[3], 2);
                                     break;
                                 }
+                            case "appLauncher":
+                                {
+                                    listener.sendMsg("[\"appLauncherData\"," + App_Launcher.getAppLauncherJson() + "]");
+                                    break;
+                                }
+                            case "launchApp":
+                                {
+                                    App_Launcher.launchApp(Int16.Parse(json_request[1]));
+                                    break;
+                                }
                             default:
                                 {
                                     break;
@@ -245,6 +254,20 @@ namespace Ryder_Engine.Components
                 try
                 {
                     listener.sendMsg("[\"status\"," + systemMonitor.getStatusJSON() + "]");
+                }
+                catch { }
+            }
+            listeners_m.ReleaseMutex();
+        }
+
+        public void notifyListenersAppLauncherUpdate(object sender, EventArgs args)
+        {
+            listeners_m.WaitOne();
+            foreach (Listener listener in listeners)
+            {
+                try
+                {
+                    listener.sendMsg("[\"appLauncherUpdate\"]");
                 }
                 catch { }
             }
