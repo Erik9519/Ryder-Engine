@@ -17,6 +17,7 @@ namespace Ryder_Engine
         // Custom Components
         SystemMonitor systemMonitor;
         PowerPlanManager powerPlanManager;
+        MonitorManager monitorManager;
         Server server;
 
         // Forms
@@ -28,8 +29,9 @@ namespace Ryder_Engine
         {
             // Initialize custom components
             powerPlanManager = new PowerPlanManager();
+            monitorManager = new MonitorManager();
             systemMonitor = new SystemMonitor();
-            server = new Server(systemMonitor, powerPlanManager);
+            server = new Server(systemMonitor, powerPlanManager, monitorManager);
             systemMonitor.newForegroundProcess = server.sendForegroundProcessToListener;
             server.start();
             systemMonitor.applySettings();

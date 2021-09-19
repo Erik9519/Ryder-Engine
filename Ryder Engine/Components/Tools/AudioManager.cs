@@ -9,19 +9,22 @@ namespace Ryder_Engine.Components.Tools
     {
         static public void switchDeviceTo(string device, int type)
         {
-            string nircmd_location = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\Resources\nircmd\nircmd.exe";
-            string args = String.Format(
-                "setdefaultsounddevice \"{0}\" {1}",
-                device,
-                type
-            );
-            Debug.WriteLine(nircmd_location);
-            Debug.WriteLine(args);
-            Process nircmd = new Process();
-            nircmd.StartInfo.FileName = nircmd_location;
-            nircmd.StartInfo.Arguments = args;
-            nircmd.StartInfo.CreateNoWindow = true;
-            nircmd.Start();
+            // Locate NirCmd exe and setup arguments
+            string exe_location = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + 
+                @"\Resources\NirCmd\nircmd.exe";
+            if (File.Exists(exe_location)) {
+                string args = String.Format(
+                    "setdefaultsounddevice \"{0}\" {1}",
+                    device,
+                    type
+                );
+                // Run NirCmd
+                Process p = new Process();
+                p.StartInfo.FileName = exe_location;
+                p.StartInfo.Arguments = args;
+                p.StartInfo.CreateNoWindow = true;
+                p.Start();
+            }
         }
     }
 }

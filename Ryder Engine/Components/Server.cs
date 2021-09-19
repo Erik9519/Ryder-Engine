@@ -65,11 +65,15 @@ namespace Ryder_Engine.Components
         private bool _stop = false;
         private SystemMonitor systemMonitor;
         private PowerPlanManager powerPlanManager;
+        private MonitorManager monitorManager;
         // netsh http add urlacl url=http://+:9519/ user=administrator listen=yes
-        public Server(SystemMonitor systemMonitor, PowerPlanManager powerPlanManager)
-        {
+        public Server(
+            SystemMonitor systemMonitor, 
+            PowerPlanManager powerPlanManager, MonitorManager monitorManager
+        ) {
             this.systemMonitor = systemMonitor;
             this.powerPlanManager = powerPlanManager;
+            this.monitorManager = monitorManager;
 
             this.listener = new TcpListener(IPAddress.Any, 9519);
         }
@@ -210,6 +214,16 @@ namespace Ryder_Engine.Components
                             case "powerPlan":
                                 {
                                     powerPlanManager.applyPowerPlan(json_request[1]);
+                                    break;
+                                }
+                            case "setMonitorBrightness":
+                                {
+                                    monitorManager.setBrightness(int.Parse(json_request[1]));
+                                    break;
+                                }
+                            case "getMonitorBrightness":
+                                {
+                                    listener.sendMsg("[\"monitorBrightness\"," + monitorManager.brightness + "]");
                                     break;
                                 }
                             case "audioProfile":
